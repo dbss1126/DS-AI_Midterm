@@ -33,11 +33,14 @@ install.packages("ggplot2")
 install.packages("ggmap")
 install.packages('devtools')
 install_github('dkahle/ggmap')
+install.packages('tidyverse')
 ```
 
 ```{r}
 library('devtools')
 library('ggmap')
+library(tidyverse)
+library(magrittr)
 #register_google(key='')
 
 ```
@@ -63,4 +66,12 @@ bus_data <- read.csv("Bus_location.csv",header=T, fileEncoding = 'euc-kr',encodi
 map <- get_map(location='seoul', zoom=11, source='google', maptype='roadmap')
 ggmap(map) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "skyblue", alpha = 0.05, size=0.5) + geom_point(data=bus_data, aes(x=x, y=y), color = "red", alpha = 0.05, size=0.5)
 ```
+```{r}
+wifi_distance <- read.csv("wifi_distance.csv", header = T,stringsAsFactors=F)
+wifi_distance %<>% gather(key="Type", value = "Distance", -name)
+ggplot(data=wifi_distance, aes(x=name, y=Distance, fill=Type))+geom_bar(width = 1, stat = "identity", position = "stack", colour = "black") +
+  scale_y_sqrt()+
+  coord_polar(start = 3*pi/2)
+```
+
 
