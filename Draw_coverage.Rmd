@@ -36,12 +36,19 @@ install_github('dkahle/ggmap')
 ```
 
 ```{r}
+library('devtools')
+library('ggmap')
+#register_google(key='')
+
+```
+
+```{r}
 library(ggplot2)
 library(ggmap)
 library(dplyr)
 raw_data <- read.csv("Public_wifi_location_seoul.csv",header=T, fileEncoding = 'euc-kr',encoding = 'utf-8') 
 raw_data[,7] = as.numeric(raw_data[,7])
-raw_data[,8] = as.numeric(raw_data[,8])
+raw_data[,8] = as.numeric(raw_data[,8])()
 
 loc_data <- filter(raw_data, lon < 40 && lon > 30)
 loc_data <- filter(raw_data, lat > 120 && lat < 130)
@@ -50,12 +57,7 @@ bus_data <- read.csv("Bus_location.csv",header=T, fileEncoding = 'euc-kr',encodi
 
 ```
 
-```{r}
-library('devtools')
-library('ggmap')
-register_google(key='')
 
-```
 
 ```{r}
 map <- get_map(location='seoul', zoom=11, source='google', maptype='roadmap')
