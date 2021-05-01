@@ -69,9 +69,9 @@ ggmap(map) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "skyblue", alp
 ```{r}
 wifi_distance <- read.csv("wifi_distance.csv", header = T,stringsAsFactors=F)
 wifi_distance %<>% gather(key="Type", value = "Distance", -name)
-ggplot(data=wifi_distance, aes(x=name, y=Distance, fill=Type))+geom_bar(width = 1, stat = "identity", position = "stack", colour = "black") +
-  scale_y_sqrt()+
-  coord_polar(start = 3*pi/2)
+ggplot(data=wifi_distance %>% filter(Type == "outdoor"), aes(x=name, y=Distance, fill=Type))+geom_bar(width = 1, stat = "identity", position = "stack", colour = "black") +
+  coord_polar()+
+  geom_bar(data=wifi_distance %>% filter(Type == "indoor"), aes(x=name, y=Distance, fill=Type),width = 1, stat = "identity", position = "stack", colour = "black")
 ```
 
 
