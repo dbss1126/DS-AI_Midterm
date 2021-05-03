@@ -32,12 +32,12 @@ Note that the `echo = FALSE` parameter was added to the code chunk to prevent pr
 install.packages("ggplot2")
 install.packages("ggmap")
 install.packages('devtools')
+library('devtools')
 install_github('dkahle/ggmap')
 install.packages('tidyverse')
 ```
 
 ```{r}
-library('devtools')
 library('ggmap')
 library(tidyverse)
 library(magrittr)
@@ -51,7 +51,7 @@ library(ggmap)
 library(dplyr)
 raw_data <- read.csv("Public_wifi_location_seoul.csv",header=T, fileEncoding = 'euc-kr',encoding = 'utf-8') 
 raw_data[,7] = as.numeric(raw_data[,7])
-raw_data[,8] = as.numeric(raw_data[,8])()
+raw_data[,8] = as.numeric(raw_data[,8])
 
 loc_data <- filter(raw_data, lon < 40 && lon > 30)
 loc_data <- filter(raw_data, lat > 120 && lat < 130)
