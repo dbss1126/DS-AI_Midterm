@@ -41,7 +41,7 @@ install.packages('tidyverse')
 library('ggmap')
 library(tidyverse)
 library(magrittr)
-#register_google(key='')
+register_google(key='')
 
 ```
 
@@ -63,8 +63,8 @@ bus_data <- read.csv("Bus_location.csv",header=T, fileEncoding = 'euc-kr',encodi
 
 
 ```{r}
-map <- get_map(location='seoul', zoom=11, source='google', maptype='roadmap')
-ggmap(map) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "skyblue", alpha = 0.05, size=0.5) + geom_point(data=bus_data, aes(x=x, y=y), color = "red", alpha = 0.05, size=0.5)
+map <- get_map(location='seoul', zoom=11, source='google', maptype='roadmap',color="bw")
+ggmap(map) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "skyblue", alpha = 0.5, size=0.1) + geom_point(data=bus_data, aes(x=x, y=y), color = "red", alpha = 0.1, size=0.1)
 ```
 ```{r}
 wifi_distance <- read.csv("wifi_distance.csv", header = T,stringsAsFactors=F)
@@ -74,4 +74,117 @@ ggplot(data=wifi_distance %>% filter(Type == "outdoor"), aes(x=name, y=Distance,
   geom_bar(data=wifi_distance %>% filter(Type == "indoor"), aes(x=name, y=Distance, fill=Type),width = 1, stat = "identity", position = "stack", colour = "black")
 ```
 
+
+```{r}
+# 랜덤으로 움직이면서 와이파이 잡히나 확인
+trace <- matrix(ncol=2) # Reset Trace
+found_wifi <- matrix(ncol=2) # Reset wifi incounter
+found_wifi_bus <- matrix(ncol=2) # Reset wifi and bus incounter
+temp_lat <- 127 #reset init pos
+temp_lon <- 37.6 #reset init pos
+trace <- rbind(trace,c(temp_lat,temp_lon)) # record init pos
+for(i in 1:1000)
+{
+  if((dim(filter(loc_data,(abs(lat-temp_lat)<0.0003)) %>% filter(abs(lon-temp_lon)<0.0003))[1] != 0))
+  {
+    #print(1)
+    found_wifi <- rbind(found_wifi,c(temp_lat,temp_lon))
+  }
+#  if((dim(filter(loc_data,(abs(lat-temp_lat)<0.0003)) %>% filter(abs(lon-temp_lon)<0.0003))[1] != 0) |     #(dim(filter(bus_data,(abs(x-temp_lat)<0.0003)) %>% filter(abs(y-temp_lon)<0.0003))[1] != 0))
+#  {
+#    #print(1)
+#    found_wifi_bus <- rbind(found,c(temp_lat,temp_lon))
+#  }
+  
+   if((dim(filter(bus_data,(abs(x-temp_lat)<0.0003)) %>% filter(abs(y-temp_lon)<0.0003))[1] != 0))
+  {
+    #print(1)
+    found_wifi_bus <- rbind(found_wifi_bus,c(temp_lat,temp_lon))
+   }
+  
+  next_dir <- sample(x=1:360, size=1)/180
+  temp_lon = temp_lon + 0.001*sinpi(next_dir)
+  temp_lat = temp_lat + 0.001*cospi(next_dir)
+  trace <- rbind(trace,c(temp_lat,temp_lon))
+}
+```
+
+```{r}
+df1 <- data.frame(trace)
+df2 <- data.frame(found_wifi_bus)
+df3 <- data.frame(found_wifi)
+map <- get_map(location=trace[500,], zoom=13, source='google', maptype='roadmap', color="bw")
+
+png(filename="7_BW.png",width=1000,height=1000,res=200,unit="px",bg="transparent")
+
+ggmap(map) + geom_point(data=df1, aes(x=X1, y=X2), color= "skyblue", alpha = 1, size=0.5) + geom_point(data=df2, aes(x=X1, y=X2), color = "red", alpha = 1, size=0.5) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "Purple", alpha = 0.1, size=0.5) + geom_point(data=bus_data, aes(x=x, y=y), color = "orange", alpha = 0.5, size=0.5)
+
+dev.off()
+
+png(filename="7_W.png",width=1000,height=1000,res=200,unit="px",bg="transparent")
+  
+  ggmap(map) + geom_point(data=df1, aes(x=X1, y=X2), color= "skyblue", alpha = 1, size=0.5) + geom_point(data=df3, aes(x=X1, y=X2), color = "red", alpha = 1, size=0.5) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "Purple", alpha = 0.5, size=0.5)
+  
+dev.off()
+```
+```{r}
+# 랜덤으로 움직이면서 와이파이 잡히나 확인
+Result_Record <- matrix(ncol=2)
+map <- get_map(location=c(126.975,37.58), zoom=13, source='google', maptype='roadmap',color="bw")
+for(j in 1:10)
+{
+  trace <- matrix(ncol=2) # Reset Trace
+  found_wifi <- matrix(ncol=2) # Reset wifi incounter
+  found_wifi_bus <- matrix(ncol=2) # Reset wifi and bus incounter
+  temp_lat <- sample(x=126950:127000,size=1)/1000 #reset init pos
+  temp_lon <- sample(x=37550:37580,size=1)/1000 #reset init pos
+  trace <- rbind(trace,c(temp_lat,temp_lon)) # record init pos
+  for(i in 1:1000)
+  {
+    if((dim(filter(loc_data,(abs(lat-temp_lat)<0.0003)) %>% filter(abs(lon-temp_lon)<0.0003))[1] != 0))
+    {
+      #print(1)
+      found_wifi <- rbind(found_wifi,c(temp_lat,temp_lon))
+    }
+    if(((dim(filter(loc_data,(abs(lat-temp_lat)<0.0003)) %>% filter(abs(lon-temp_lon)<0.0003))[1] != 0)) | ((dim(filter(bus_data,(abs(x-temp_lat)<0.0003)) %>% filter(abs(y-temp_lon)<0.0003))[1] != 0)))
+    {
+      #print(1)
+      found_wifi_bus <- rbind(found_wifi_bus,c(temp_lat,temp_lon))
+    }
+    next_dir <- sample(x=1:360, size=1)/180
+    temp_lon = temp_lon + 0.001*sinpi(next_dir)
+    temp_lat = temp_lat + 0.001*cospi(next_dir)
+    trace <- rbind(trace,c(temp_lat,temp_lon))
+  }
+  
+  df1 <- data.frame(trace)
+  df2 <- data.frame(found_wifi)
+  df3 <- data.frame(found_wifi_bus)
+  
+  Result_Record <- rbind(Result_Record,c(dim(df2)[1],dim(df3)[1]))
+  
+  
+  
+  png(filename=paste0(j+10,"_W.png"),width=1000,height=1000,res=200,unit="px",bg="transparent")
+  
+  ggmap(map) + geom_point(data=df1, aes(x=X1, y=X2), color= "skyblue", alpha = 1, size=0.5) + geom_point(data=df2, aes(x=X1, y=X2), color = "red", alpha = 1, size=0.5) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "Purple", alpha = 0.05, size=0.5)
+  
+  dev.off()
+  
+  png(filename=paste0(j+10,"_WB.png"),width=1000,height=1000,res=200,unit="px",bg="transparent")
+  
+  ggmap(map) + geom_point(data=df1, aes(x=X1, y=X2), color= "skyblue", alpha = 1, size=0.5) + geom_point(data=df3, aes(x=X1, y=X2), color = "red", alpha = 1, size=0.5) + geom_point(data=loc_data, aes(x=lat, y=lon), color = "Purple", alpha = 0.05, size=0.5) + geom_point(data=bus_data, aes(x=x, y=y), color = "orange", alpha = 0.5, size=0.5)
+  
+  dev.off()
+  
+  print(j)
+}
+
+```
+
+```{r}
+Result_Df = data.frame(Result_Record[2:101,])
+ggplot(data=a,aes(x=1:100,y=X2))+geom_area(fill="#F5584E")+geom_area(aes(x=1:100,y=X1),fill="#1E4E79")+theme_bw()
+
+```
 
